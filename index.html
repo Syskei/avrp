@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Profile & Music Bar</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #2b2b2b, #1a1a1a);
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            position: relative;
+            height: 100vh;
+        }
+
+        /* Snowflake styles */
+        .snowflake {
+            position: absolute;
+            top: -10px;
+            font-size: 10px;
+            color: white;
+            opacity: 0.8;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        /* Profile Picture */
+        .profile-picture {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid white;
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .profile-picture img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% {
+                transform: translate(-50%, -55%) scale(1.05);
+            }
+        }
+
+        /* AV RP Text */
+        .av {
+            position: absolute;
+            top: 20%;
+            left: 40%;
+            font-size: 64px;
+            font-weight: bolder;
+            color: white;
+            transform: translate(-50%, -50%);
+        }
+
+        .rp {
+            position: absolute;
+            top: 20%;
+            right: 40%;
+            font-size: 64px;
+            font-weight: bolder;
+            color: white;
+            transform: translate(50%, -50%);
+        }
+
+        /* Single Image Text Area */
+        .single-text-area {
+            position: absolute;
+            top: calc(40% - 30px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid white;
+            border-radius: 8px;
+            padding: 10px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .single-text-area img {
+            width: 100px;
+            height: 100px;
+            border-radius: 5px;
+        }
+
+        .single-text-area .text-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .single-text-area .title {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .single-text-area .extra-text {
+            font-size: 14px;
+            color: #ccc;
+            text-align: center;
+        }
+
+        /* Dual Image Text Area */
+        .dual-text-area {
+            position: absolute;
+            top: calc(60% - 20px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .dual-text-area .image-container {
+            position: relative;
+            width: 45%;
+            overflow: hidden;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .dual-text-area img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .dual-text-area .image-container:hover img {
+            transform: scale(1.1);
+        }
+
+        .dual-text-area .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .dual-text-area .image-container:hover .overlay {
+            opacity: 1;
+        }
+
+        /* Ribbon */
+        .ribbon {
+            position: absolute;
+            top: 10%;
+            right: 0;
+            background: #333;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            width: 40px;
+            height: 40px;
+            overflow: hidden;
+            border-radius: 5px;
+            transition: width 0.3s ease;
+            cursor: pointer;
+        }
+
+        .ribbon img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+
+        .ribbon span {
+            opacity: 0;
+            white-space: nowrap;
+            transition: opacity 0.3s ease;
+            font-size: 14px;
+        }
+
+        .ribbon:hover {
+            width: 200px;
+        }
+
+        .ribbon:hover span {
+            opacity: 1;
+        } 
+
+        /* Spotify-style Music Bar */
+        .music-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            background: #444;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .music-bar img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            margin-right: 10px;
+        }
+
+        .music-bar .info {
+            flex-grow: 1;
+        }
+
+        .music-bar .info .title {
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .music-bar .info .artist {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .music-bar .controls {
+            display: flex;
+            align-items: center;
+        }
+
+        .music-bar .controls button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: transform 0.2s, color 0.2s;
+        }
+
+        .music-bar .controls button:hover {
+            transform: scale(1.2);
+            color: #ccc;
+        }
+
+        .music-bar .progress {
+            width: 100%;
+            height: 5px;
+            background: #666;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .music-bar .progress div {
+            width: 0%;
+            height: 100%;
+            background: white;
+        }
+
+        /* Volume Slider */
+        .volume-container {
+            position: absolute;
+            bottom: 60px;
+            right: 140px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .volume-slider {
+            width: 5px;
+            height: 100px;
+            background: #444;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .volume-slider div {
+            width: 100%;
+            height: 50%;
+            background: white;
+            position: absolute;
+            bottom: 0;
+        }
+
+        .volume-icon {
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .volume-icon:hover {
+            transform: scale(1.2);
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <!-- Snowfall container -->
+    <div id="snow-container"></div>
+
+    <!-- AV RP Text -->
+    <div class="av">AV</div>
+    <div class="rp">RP</div>
+
+    <!-- Profile Picture -->
+    <div class="profile-picture">
+        <img src="profile.jpg" alt="Profile Picture">
+    </div>
+
+    <!-- Single Image Text Area -->
+    <div class="single-text-area">
+        <div class="text-box">
+            <div class="title">Avi</div>
+            <div class="extra-text">Probably making something while fried</div>
+        </div>
+        <img src="single-image.jpg" alt="Single Image">
+        <div class="text-box">
+            <div class="title">Skills</div>
+            <div class="extra-text">C++, HTML, Python, Graphic Design & more </div>
+        </div>
+    </div>
+
+    <!-- Dual Image Text Area -->
+    <div class="dual-text-area">
+        <div class="image-container">
+            <img src="image1.jpg" alt="Image 1">
+            <div class="overlay">MY SHAYLAAA 😭😭😢</div>
+        </div>
+        <div class="image-container">
+            <img src="image2.jpg" alt="Image 2">
+            <div class="overlay">gangy</div>
+        </div>
+    </div>
+
+    <!-- Ribbon -->
+    <div class="ribbon">
+        <img src="ribbon-icon.jpg" alt="Ribbon Icon">
+        <span>Discord: AVRP</span>
+    </div>
+
+    <!-- Spotify-style Music Bar -->
+    <div class="music-bar">
+        <img id="album-art" src="default-album.jpg" alt="Album Art">
+        <div class="info">
+            <div class="title" id="song-title">Song Title</div>
+            <div class="artist" id="song-artist">Artist Name</div>
+            <div class="progress">
+                <div id="progress-bar"></div>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="prev">&lt;&lt;</button>
+            <button id="play-pause">▶</button>
+            <button id="next">&gt;&gt;</button>
+        </div>
+        <div class="volume-icon" id="volume-icon">🔊</div>
+    </div>
+
+    <div class="volume-container" id="volume-container">
+        <div class="volume-slider" id="volume-slider">
+            <div id="volume-bar" style="height: 30%;"></div>
+        </div>
+    </div>
+
+    <audio id="audio-player" preload="metadata"></audio>
+
+    <script>
+        const songs = [
+            { title: "Syxx Anthem", artist: "Lucy Bedroque", file: "syxx.mp3", albumArt: "album1.jpg" },
+            { title: "Famous", artist: "Nate Sib", file: "famous.mp3", albumArt: "album2.jpg" },
+            { title: "Block Work", artist: "Homixide Gang", file: "block.mp3", albumArt: "album3.jpg" }
+        ];
+
+        let currentSongIndex = Math.floor(Math.random() * songs.length);
+        const audioPlayer = document.getElementById('audio-player');
+        const songTitle = document.getElementById('song-title');
+        const songArtist = document.getElementById('song-artist');
+        const albumArt = document.getElementById('album-art');
+        const progressBar = document.getElementById('progress-bar');
+        const playPauseButton = document.getElementById('play-pause');
+        const volumeIcon = document.getElementById('volume-icon');
+        const volumeContainer = document.getElementById('volume-container');
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumeBar = document.getElementById('volume-bar');
+        const snowContainer = document.getElementById('snow-container');
+
+        const loadSong = (index) => {
+            const song = songs[index];
+            audioPlayer.src = song.file;
+            songTitle.textContent = song.title;
+            songArtist.textContent = song.artist;
+            albumArt.src = song.albumArt;
+        };
+
+        const playPause = () => {
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                playPauseButton.textContent = '||';
+            } else {
+                audioPlayer.pause();
+                playPauseButton.textContent = '▶';
+            }
+        };
+
+        const nextSong = () => {
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
+            loadSong(currentSongIndex);
+            audioPlayer.play();
+            playPauseButton.textContent = '||';
+        };
+
+        const prevSong = () => {
+            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+            loadSong(currentSongIndex);
+            audioPlayer.play();
+            playPauseButton.textContent = '||';
+        };
+
+        audioPlayer.addEventListener('timeupdate', () => {
+        const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+        progressBar.style.width = progress + '%';
+        });
+
+        // Add event listener for seeking
+        document.querySelector('.progress').addEventListener('click', (e) => {
+            const progressRect = e.target.getBoundingClientRect();
+            const clickX = e.clientX - progressRect.left;
+            const progressWidth = progressRect.width;
+            const newTime = (clickX / progressWidth) * audioPlayer.duration;
+
+            // Set the new playback time
+            audioPlayer.currentTime = newTime;
+        });
+
+        audioPlayer.addEventListener('ended', () => {
+            nextSong();
+        });
+
+        volumeIcon.addEventListener('click', () => {
+            volumeContainer.style.display = volumeContainer.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        volumeSlider.addEventListener('click', (e) => {
+            const rect = volumeSlider.getBoundingClientRect();
+            const offset = rect.bottom - e.clientY;
+            const volume = Math.max(0, Math.min(1, offset / rect.height));
+            audioPlayer.volume = volume;
+            volumeBar.style.height = volume * 100 + '%';
+        });
+
+        document.getElementById('play-pause').addEventListener('click', playPause);
+        document.getElementById('next').addEventListener('click', nextSong);
+        document.getElementById('prev').addEventListener('click', prevSong);
+
+        const createSnowflake = () => {
+            const snowflake = document.createElement('div');
+            snowflake.textContent = '❄';
+            snowflake.className = 'snowflake';
+
+            // Randomize position and animation properties
+            snowflake.style.left = Math.random() * 100 + 'vw';
+            snowflake.style.animationDuration = Math.random() * 3 + 2 + 's';
+            snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
+
+            // Assign the special color to 1 in 8 snowflakes
+            if (Math.random() < 1 / 8) {
+                snowflake.style.color = '#d42a4f';
+            } else {
+                snowflake.style.color = 'white'; // Default color
+            }
+
+            // Append snowflake to container and remove after animation
+            snowContainer.appendChild(snowflake);
+            setTimeout(() => snowflake.remove(), 8000);
+        };
+
+
+        setInterval(createSnowflake, 100);
+
+        loadSong(currentSongIndex);
+
+        // Autoplay music if possible, otherwise leave play button as play
+        audioPlayer.volume = 0.2; // Set initial volume to 20%
+        audioPlayer.play().then(() => {
+            playPauseButton.textContent = '||';
+        }).catch(() => {
+            playPauseButton.textContent = '▶';
+        });
+    </script>
+</body>
+</html>
