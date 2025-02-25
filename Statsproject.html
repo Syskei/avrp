@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tug of War Dice</title>
+  <style>
+    /* Global Theme */
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      line-height: 1.6;
+      text-align: center; /* center titles and labels */
+    }
+    h1, h2, h3 {
+      margin: 10px 0;
+    }
+    .hidden {
+      display: none;
+    }
+    .player-turn {
+      font-weight: bold;
+      color: #007BFF;
+    }
+    .winner {
+      color: #4caf50;
+      font-weight: bold;
+    }
+    .dice-result {
+      margin-top: 10px;
+    }
+    /* Button & Input Styles */
+    button, input {
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+    button {
+      background-color: #1f1f1f;
+      color: #e0e0e0;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #333333;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    input {
+      background-color: #1f1f1f;
+      color: #e0e0e0;
+      border: 1px solid #333;
+    }
+    /* Scoreboard Styles */
+    .scoreboard {
+      margin-top: 20px;
+      border: 1px solid #333;
+      padding: 10px;
+      max-width: 400px;
+      border-radius: 5px;
+      background-color: #1f1f1f;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .scoreboard h3 {
+      margin-top: 0;
+    }
+    .scoreboard ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .bonus, .penalty {
+      font-weight: bold;
+    }
+    .bonus {
+      color: #4caf50;
+    }
+    .penalty {
+      color: #ff5252;
+    }
+    /* Tug of War Bar Styles */
+    .tugOfWarContainer {
+      display: flex;
+      justify-content: space-between; /* bars on each side */
+      align-items: center;
+      width: 80%;
+      margin: 20px auto;
+    }
+    .tugOfWarBar {
+      width: 50px;
+      height: 300px;
+      background: #333;
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .tugOfWarFill {
+      width: 100%;
+      background: #007BFF;
+      position: absolute;
+      bottom: 0;
+      height: 0;
+      border-radius: 10px 10px 0 0;
+    }
+    /* Roll Section Styles */
+    .rollSection {
+      margin-top: 20px;
+    }
+    /* Dice GIF styling - covering around 50-75% of the screen */
+    #diceGif {
+      display: none;
+      position: fixed; /* overlay the content */
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60%;  /* roughly 50-75% of screen width */
+      max-width: 600px;
+      border: 2px solid #007BFF;
+      border-radius: 10px;
+      background-color: #1f1f1f;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Tug of War Dice</h1>
+  <h1>Avirup and Fahad</h1>
+
+  <!-- Start Game Button -->
+  <div>
+    <button id="startGameBtn">Start Game</button>
+  </div>
+
+  <div id="gameArea" class="hidden">
+    <h2 id="activePlayerDisplay" class="player-turn"></h2>
+
+    <!-- Tug of War Bars Container -->
+    <div class="tugOfWarContainer">
+      <div class="tugOfWarBar" id="player1Bar">
+        <div class="tugOfWarFill" id="player1Fill"></div>
+      </div>
+      <div class="tugOfWarBar" id="player2Bar">
+        <div class="tugOfWarFill" id="player2Fill"></div>
+      </div>
+    </div>
+
+    <!-- Roll Section: Button and Outcome Texts -->
+    <div class="rollSection">
+      <button id="rollDiceBtn" disabled>Roll Dice</button>
+      <img id="diceGif" src="https://i.pinimg.com/originals/75/09/82/750982c4ccc4737e643207f54c40170a.gif" alt="Dice Rolling" />
+      <div id="diceOutcome"></div>
+      <div id="specialOutcome"></div>
+      <div id="winnerMessage" class="winner hidden"></div>
+    </div>
+  </div>
+
+  <div class="scoreboard hidden" id="scoreboard">
+    <h3>Scoreboard</h3>
+    <ul id="scoreList"></ul>
+  </div>
+
+  <script>
+    let players = [];
+    let activePlayerIndex = null;
+    let gameOver = false;
+
+    let player1Clicks = 0;
+    let player2Clicks = 0;
+    const maxClicks = 15;
+
+    const startGameBtn = document.getElementById('startGameBtn');
+    const rollDiceBtn = document.getElementById('rollDiceBtn');
+    const activePlayerDisplay = document.getElementById('activePlayerDisplay');
+    const diceOutcomeDiv = document.getElementById('diceOutcome');
+    const specialOutcomeDiv = document.getElementById('specialOutcome');
+    const winnerMessageDiv = document.getElementById('winnerMessage');
+    const gameAreaDiv = document.getElementById('gameArea');
+    const scoreboardDiv = document.getElementById('scoreboard');
+    const scoreListUl = document.getElementById('scoreList');
+    const player1Fill = document.getElementById('player1Fill');
+    const player2Fill = document.getElementById('player2Fill');
+    const diceGif = document.getElementById('diceGif');
+
+    startGameBtn.addEventListener('click', () => {
+
+      players = [
+        { name: 'Player 1 [ left ]', score: 0 },
+        { name: 'Player 2 [ right ]', score: 0 }
+      ];
+
+      gameOver = false;
+      player1Clicks = 0;
+      player2Clicks = 0;
+      resetBars();
+
+      diceOutcomeDiv.textContent = '';
+      specialOutcomeDiv.textContent = '';
+      winnerMessageDiv.textContent = '';
+      winnerMessageDiv.classList.add('hidden');
+
+      updateScoreboard();
+      gameAreaDiv.classList.remove('hidden');
+      scoreboardDiv.classList.remove('hidden');
+
+      activePlayerDisplay.textContent = 'Player 1 (A) vs Player 2 (L)';
+
+      document.addEventListener('keydown', handleKeyPress);
+    });
+
+    function handleKeyPress(e) {
+      if (gameOver) return;
+
+      if (e.key.toLowerCase() === 'a') {
+        player1Clicks++;
+        updateBar(player1Fill, player1Clicks);
+        if (player1Clicks >= maxClicks) endTugOfWar(0);
+      } else if (e.key.toLowerCase() === 'l') {
+        player2Clicks++;
+        updateBar(player2Fill, player2Clicks);
+        if (player2Clicks >= maxClicks) endTugOfWar(1);
+      }
+    }
+
+    function updateBar(barElement, clicks) {
+      const height = (clicks / maxClicks) * 100;
+      barElement.style.height = height + '%';
+    }
+
+    function resetBars() {
+      player1Fill.style.height = '0%';
+      player2Fill.style.height = '0%';
+    }
+
+    function endTugOfWar(winnerIndex) {
+      activePlayerIndex = winnerIndex;
+      activePlayerDisplay.textContent = `${players[activePlayerIndex].name} wins the tug of war! Roll the dice.`;
+      rollDiceBtn.disabled = false;
+      document.removeEventListener('keydown', handleKeyPress);
+    }
+
+    rollDiceBtn.addEventListener('click', () => {
+      if (gameOver) return;
+
+      // Show dice GIF and disable roll button 
+      rollDiceBtn.disabled = true;
+      diceOutcomeDiv.textContent = '';
+      specialOutcomeDiv.textContent = '';
+      diceGif.style.display = 'block';
+
+      // After a 2-second delay hide the GIF and execute the dice roll logic
+      setTimeout(() => {
+        diceGif.style.display = 'none';
+
+        const die1 = Math.floor(Math.random() * 6) + 1;
+        const die2 = Math.floor(Math.random() * 6) + 1;
+        const sum = die1 + die2;
+
+        diceOutcomeDiv.textContent = `You rolled ${die1} and ${die2}. Sum = ${sum}.`;
+
+        let currentScore = players[activePlayerIndex].score;
+        let specialMessage = '';
+
+        if (sum === 7) {
+          currentScore += 3;
+          specialMessage = '<span class="bonus">Bonus! +3 points for rolling a 7.</span>';
+        } else if (sum === 2 || sum === 12) {
+          currentScore = Math.max(0, currentScore - 2);
+          specialMessage = '<span class="penalty">Penalty! -2 points for rolling a 2 or 12.</span>';
+        } else if (die1 === die2) {
+          currentScore += 4;
+          specialMessage = '<span class="bonus">Double! +4 points for rolling doubles.</span>';
+        } else if (sum === 11) {
+          currentScore += 2;
+          specialMessage = '<span class="bonus">Lucky Eleven! +2 points.</span>';
+        } else if (sum === 3) {
+          currentScore = Math.max(0, currentScore - 3);
+          specialMessage = '<span class="penalty">Unlucky Three! -3 points.</span>';
+        } else {
+          currentScore += 1;
+        }
+
+        players[activePlayerIndex].score = currentScore;
+        specialOutcomeDiv.innerHTML = specialMessage;
+        updateScoreboard();
+
+        if (currentScore >= 10) {
+          winnerMessageDiv.textContent = `${players[activePlayerIndex].name} wins with ${currentScore} points!`;
+          winnerMessageDiv.classList.remove('hidden');
+          gameOver = true;
+          rollDiceBtn.disabled = true;
+          return;
+        }
+
+        // Prepare for next round
+        player1Clicks = 0;
+        player2Clicks = 0;
+        resetBars();
+        rollDiceBtn.disabled = true;
+        activePlayerDisplay.textContent = 'Player 1 (A) vs Player 2 (L)';
+        document.addEventListener('keydown', handleKeyPress);
+      }, 2000);
+    });
+
+    function updateScoreboard() {
+      scoreListUl.innerHTML = '';
+      players.forEach(player => {
+        const li = document.createElement('li');
+        li.textContent = `${player.name}: ${player.score} pts`;
+        scoreListUl.appendChild(li);
+      });
+    }
+  </script>
+
+</body>
+</html>
