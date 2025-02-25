@@ -17,7 +17,7 @@
       margin: 10px 0;
     }
     .hidden {
-      display: none;
+      display: none !important;
     }
     .player-turn {
       font-weight: bold;
@@ -83,7 +83,7 @@
     .penalty {
       color: #ff5252;
     }
-    /* Tug of War Bar Styles */
+    /* Bar Styles */
     .tugOfWarContainer {
       display: flex;
       justify-content: space-between; /* bars on each side */
@@ -111,23 +111,48 @@
     .rollSection {
       margin-top: 20px;
     }
-    /* Dice GIF styling - covering around 50-75% of the screen */
+    /* Dice gif */
     #diceGif {
       display: none;
-      position: fixed; /* overlay the content */
+      position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 60%;  /* roughly 50-75% of screen width */
+      width: 60%;  
       max-width: 600px;
       border: 2px solid #007BFF;
       border-radius: 10px;
       background-color: #1f1f1f;
       z-index: 1000;
     }
+    /* Touchscreen Mode Styles */
+    .touchscreen-btn {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      font-size: 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Touchscreen Mode Toggle (fixed top-right) -->
+  <div id="touchscreenToggleContainer" style="position: fixed; top: 10px; right: 10px; z-index: 1001;">
+    <label>
+      <input type="checkbox" id="touchscreenToggle" /> Touchscreen Mode
+    </label>
+  </div>
+
+  <!-- Touchscreen Buttons (initially hidden) -->
+  <button id="touchscreenBtnP1" class="touchscreen-btn hidden" style="position: fixed; bottom: 30px; left: 30px;">👆</button>
+  <button id="touchscreenBtnP2" class="touchscreen-btn hidden" style="position: fixed; bottom: 30px; right: 30px;">👆</button>
 
   <h1>Tug of War Dice</h1>
   <h1>Avirup and Fahad</h1>
@@ -140,7 +165,6 @@
   <div id="gameArea" class="hidden">
     <h2 id="activePlayerDisplay" class="player-turn"></h2>
 
-    <!-- Tug of War Bars Container -->
     <div class="tugOfWarContainer">
       <div class="tugOfWarBar" id="player1Bar">
         <div class="tugOfWarFill" id="player1Fill"></div>
@@ -150,7 +174,6 @@
       </div>
     </div>
 
-    <!-- Roll Section: Button and Outcome Texts -->
     <div class="rollSection">
       <button id="rollDiceBtn" disabled>Roll Dice</button>
       <img id="diceGif" src="https://i.pinimg.com/originals/75/09/82/750982c4ccc4737e643207f54c40170a.gif" alt="Dice Rolling" />
@@ -187,8 +210,32 @@
     const player2Fill = document.getElementById('player2Fill');
     const diceGif = document.getElementById('diceGif');
 
-    startGameBtn.addEventListener('click', () => {
+    // Function to process player input (from key or touchscreen)
+    function playerInput(playerIndex) {
+      if (gameOver) return;
+      if (playerIndex === 0) {
+        player1Clicks++;
+        updateBar(player1Fill, player1Clicks);
+        if (player1Clicks >= maxClicks) endTugOfWar(0);
+      } else if (playerIndex === 1) {
+        player2Clicks++;
+        updateBar(player2Fill, player2Clicks);
+        if (player2Clicks >= maxClicks) endTugOfWar(1);
+      }
+    }
 
+    // Keyboard handler modified to use playerInput()
+    function handleKeyPress(e) {
+      if (gameOver) return;
+      const key = e.key.toLowerCase();
+      if (key === 'a') {
+        playerInput(0);
+      } else if (key === 'l') {
+        playerInput(1);
+      }
+    }
+
+    startGameBtn.addEventListener('click', () => {
       players = [
         { name: 'Player 1 [ left ]', score: 0 },
         { name: 'Player 2 [ right ]', score: 0 }
@@ -213,20 +260,6 @@
       document.addEventListener('keydown', handleKeyPress);
     });
 
-    function handleKeyPress(e) {
-      if (gameOver) return;
-
-      if (e.key.toLowerCase() === 'a') {
-        player1Clicks++;
-        updateBar(player1Fill, player1Clicks);
-        if (player1Clicks >= maxClicks) endTugOfWar(0);
-      } else if (e.key.toLowerCase() === 'l') {
-        player2Clicks++;
-        updateBar(player2Fill, player2Clicks);
-        if (player2Clicks >= maxClicks) endTugOfWar(1);
-      }
-    }
-
     function updateBar(barElement, clicks) {
       const height = (clicks / maxClicks) * 100;
       barElement.style.height = height + '%';
@@ -247,13 +280,13 @@
     rollDiceBtn.addEventListener('click', () => {
       if (gameOver) return;
 
-      // Show dice GIF and disable roll button 
+      // Show dice gif and disable roll button 
       rollDiceBtn.disabled = true;
       diceOutcomeDiv.textContent = '';
       specialOutcomeDiv.textContent = '';
       diceGif.style.display = 'block';
 
-      // After a 2-second delay hide the GIF and execute the dice roll logic
+      // After a 2second delay hide the gif and execute the dice roll logic
       setTimeout(() => {
         diceGif.style.display = 'none';
 
@@ -315,6 +348,34 @@
         scoreListUl.appendChild(li);
       });
     }
+
+    // Touchscreen Mode Event Listeners
+    const touchscreenToggle = document.getElementById('touchscreenToggle');
+    const touchscreenBtnP1 = document.getElementById('touchscreenBtnP1');
+    const touchscreenBtnP2 = document.getElementById('touchscreenBtnP2');
+
+    function updateTouchscreenButtons() {
+      if (touchscreenToggle.checked) {
+        touchscreenBtnP1.classList.remove('hidden');
+        touchscreenBtnP2.classList.remove('hidden');
+      } else {
+        touchscreenBtnP1.classList.add('hidden');
+        touchscreenBtnP2.classList.add('hidden');
+      }
+    }
+
+    // Check the initial state on page load
+    updateTouchscreenButtons();
+
+    touchscreenToggle.addEventListener('change', updateTouchscreenButtons);
+
+    touchscreenBtnP1.addEventListener('click', () => {
+      playerInput(0);
+    });
+
+    touchscreenBtnP2.addEventListener('click', () => {
+      playerInput(1);
+    });
   </script>
 
 </body>
