@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Does Social Media Usage Affect Academic Performance?</title>
+  <!-- Include Chart.js for our graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      line-height: 1.6;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    section {
+      margin-bottom: 40px;
+    }
+    /* Updated canvas styling for larger charts */
+    canvas {
+      width: 800px !important;
+      height: 600px !important;
+      margin: 20px auto;
+      display: block;
+    }
+    ul {
+      list-style: disc inside;
+    }
+  </style>
+</head>
+<body>
+  <!-- Title -->
+  <h1>Does Social Media Usage Affect Academic Performance?</h1>
+  
+  <!-- Introduction Section -->
+  <section id="introduction">
+    <h2>Introduction</h2>
+    <p>
+      The purpose of this study is to investigate whether the amount of time students spend on social media impacts their academic performance, as measured by GPA. Our main research question is: "Does social media usage affect student academic performance?" The hypothesis is that students who spend less time on social media have higher GPAs. Alternatively, there may be no significant effect.
+    </p>
+    <p>
+      In today’s digital age, social media is a major part of students’ lives and could potentially influence time management, study habits, focus, and overall academic success. This project will analyze the data using graphs that compare social media usage (in hours) with the GPA of each student, while also noting whether social media is used during study time.
+    </p>
+  </section>
+  
+  <!-- Data Collection Section -->
+  <section id="data-collection">
+    <h2>Data Collection</h2>
+    <p>
+      Data was collected using a Google Form survey distributed to students who were randomly selected from the hallway. The survey included the following questions:
+    </p>
+    <ul>
+      <li>How many hours do you spend on social media per day?</li>
+      <li>What is your current GPA?</li>
+      <li>Do you use social media while studying?</li>
+      <li>Year in School</li>
+    </ul>
+    <p>
+      No identifiable information was collected in order to maintain the privacy and ethical integrity of the study. In total, 30 responses were gathered for analysis.
+    </p>
+  </section>
+  
+  <!-- Graphs Section -->
+  <section id="graphs">
+    <h2>Graphs and Analysis</h2>
+    <h3>Scatter Plot: Social Media Hours vs. GPA</h3>
+    <p>
+      This scatter plot shows individual student data points. The x-axis represents the number of hours spent on social media per day, and the y-axis represents the student’s GPA. Data points are color-coded by whether the student uses social media while studying.
+    </p>
+    <!-- Larger canvas dimensions set via HTML attributes as well -->
+    <canvas id="scatterChart" width="800" height="600"></canvas>
+    
+    <h3>Bar Chart: Average GPA by Social Media Usage Group</h3>
+    <p>
+      In this bar chart, students have been divided into three groups based on their social media usage:
+    </p>
+    <ul>
+      <li><strong>Low (1-3 hrs)</strong></li>
+      <li><strong>Medium (4-6 hrs)</strong></li>
+      <li><strong>High (7-8 hrs)</strong></li>
+    </ul>
+    <p>
+      The chart displays the average GPA for each group calculated from the survey data:
+      <br><strong>Low:</strong> 3.18 | <strong>Medium:</strong> 3.24 | <strong>High:</strong> 2.76
+    </p>
+    <canvas id="barChart" width="800" height="600"></canvas>
+  </section>
+  
+  <!-- Conclusion Section -->
+  <section id="conclusion">
+    <h2>Conclusion</h2>
+    <p>
+      The fact that students who spend less time on social media have higher GPA is partially supported by the data. Students in the high usage group demonstrate lower academic performance compared to their peers in the low and medium social media usage groups. However, the relatively small difference between the low and medium groups implies that moderate social media use may not significantly impact GPA.
+    </p>
+    <h2>Data</h2>
+    <ul>
+      <li>Year: Freshman | Social Media Hours: 2 | GPA: 3.4 | Uses While Studying: Yes</li>
+      <li>Year: Sophomore | Social Media Hours: 8 | GPA: 2.5 | Uses While Studying: Yes</li>
+      <li>Year: Freshman | Social Media Hours: 4 | GPA: 3.2 | Uses While Studying: No</li>
+      <li>Year: Junior | Social Media Hours: 2 | GPA: 2.8 | Uses While Studying: Yes</li>
+      <li>Year: Freshman | Social Media Hours: 7 | GPA: 2.8 | Uses While Studying: Yes</li>
+      <li>Year: Senior | Social Media Hours: 6 | GPA: 3.0 | Uses While Studying: Yes</li>
+      <li>Year: Junior | Social Media Hours: 5 | GPA: 3.6 | Uses While Studying: Yes</li>
+      <li>Year: Sophomore | Social Media Hours: 4 | GPA: 3.2 | Uses While Studying: No</li>
+      <li>Year: Freshman | Social Media Hours: 5 | GPA: 3.0 | Uses While Studying: Yes</li>
+      <li>Year: Senior | Social Media Hours: 3 | GPA: 2.8 | Uses While Studying: Yes</li>
+      <li>Year: Sophomore | Social Media Hours: 4 | GPA: 3.6 | Uses While Studying: Yes</li>
+      <li>Year: Junior | Social Media Hours: 6 | GPA: 3.2 | Uses While Studying: Yes</li>
+      <li>Year: Junior | Social Media Hours: 1 | GPA: 3.0 | Uses While Studying: No</li>
+      <li>Year: Sophomore | Social Media Hours: 5 | GPA: 3.2 | Uses While Studying: Yes</li>
+      <li>Year: Freshman | Social Media Hours: 7 | GPA: 3.0 | Uses While Studying: Yes</li>
+      <li>Year: Senior | Social Media Hours: 3 | GPA: 3.8 | Uses While Studying: No</li>
+      <li>Year: Freshman | Social Media Hours: 6 | GPA: 3.2 | Uses While Studying: Yes</li>
+      <li>Year: Junior | Social Media Hours: 2 | GPA: 3.4 | Uses While Studying: Yes</li>
+      <li>Year: Freshman | Social Media Hours: 1 | GPA: 3.0 | Uses While Studying: No</li>
+      <li>Year: Senior | Social Media Hours: 4 | GPA: 3.4 | Uses While Studying: Yes</li>
+      <li>Year: Sophomore | Social Media Hours: 6 | GPA: 3.0 | Uses While Studying: Yes</li>
+      <li>Year: Senior | Social Media Hours: 7 | GPA: 2.5 | Uses While Studying: Yes</li>
+      <li>Year: Freshman | Social Media Hours: 5 | GPA: 3.6 | Uses While Studying: Yes</li>
+      <li>Year: Junior | Social Media Hours: 3 | GPA: 3.2 | Uses While Studying: Yes</li>
+      <li>Year: Sophomore | Social Media Hours: 6 | GPA: 3.4 | Uses While Studying: Yes</li>
+      <li>Year: Freshman | Social Media Hours: 4 | GPA: 2.5 | Uses While Studying: Yes</li>
+      <li>Year: Senior | Social Media Hours: 5 | GPA: 3.6 | Uses While Studying: No</li>
+      <li>Year: Junior | Social Media Hours: 7 | GPA: 3.0 | Uses While Studying: Yes</li>
+      <li>Year: Sophomore | Social Media Hours: 3 | GPA: 3.2 | Uses While Studying: Yes</li>
+      <li>Year: Senior | Social Media Hours: 6 | GPA: 3.2 | Uses While Studying: Yes</li>
+    </ul>
+  </section>
+  
+  <!-- JavaScript for the charts -->
+  <script>
+    // Scatter Plot Data: Each data point is an object with x (social media hours) and y (GPA).
+    // Data is separated by whether the student uses social media while studying.
+    // Provided Data Records:
+    //  1. Freshman | Hours: 2 | GPA: 3.4 | Uses: Yes  
+    //  2. Sophomore | Hours: 8 | GPA: 2.5 | Uses: Yes  
+    //  3. Freshman | Hours: 4 | GPA: 3.2 | Uses: No  
+    //  4. Junior | Hours: 2 | GPA: 2.8 | Uses: Yes  
+    //  5. Freshman | Hours: 7 | GPA: 2.8 | Uses: Yes  
+    //  6. Senior | Hours: 6 | GPA: 3.0 | Uses: Yes  
+    //  7. Junior | Hours: 5 | GPA: 3.6 | Uses: Yes  
+    //  8. Sophomore | Hours: 4 | GPA: 3.2 | Uses: No  
+    //  9. Freshman | Hours: 5 | GPA: 3.0 | Uses: Yes  
+    // 10. Senior | Hours: 3 | GPA: 2.8 | Uses: Yes  
+    // 11. Sophomore | Hours: 4 | GPA: 3.6 | Uses: Yes  
+    // 12. Junior | Hours: 6 | GPA: 3.2 | Uses: Yes  
+    // 13. Junior | Hours: 1 | GPA: 3.0 | Uses: No  
+    // 14. Sophomore | Hours: 5 | GPA: 3.2 | Uses: Yes  
+    // 15. Freshman | Hours: 7 | GPA: 3.0 | Uses: Yes  
+    // 16. Senior | Hours: 3 | GPA: 3.8 | Uses: No  
+    // 17. Freshman | Hours: 6 | GPA: 3.2 | Uses: Yes  
+    // 18. Junior | Hours: 2 | GPA: 3.4 | Uses: Yes  
+    // 19. Freshman | Hours: 1 | GPA: 3.0 | Uses: No  
+    // 20. Senior | Hours: 4 | GPA: 3.4 | Uses: Yes  
+    // 21. Sophomore | Hours: 6 | GPA: 3.0 | Uses: Yes  
+    // 22. Senior | Hours: 7 | GPA: 2.5 | Uses: Yes  
+    // 23. Freshman | Hours: 5 | GPA: 3.6 | Uses: Yes  
+    // 24. Junior | Hours: 3 | GPA: 3.2 | Uses: Yes  
+    // 25. Sophomore | Hours: 6 | GPA: 3.4 | Uses: Yes  
+    // 26. Freshman | Hours: 4 | GPA: 2.5 | Uses: Yes  
+    // 27. Senior | Hours: 5 | GPA: 3.6 | Uses: No  
+    // 28. Junior | Hours: 7 | GPA: 3.0 | Uses: Yes  
+    // 29. Sophomore | Hours: 3 | GPA: 3.2 | Uses: Yes  
+    // 30. Senior | Hours: 6 | GPA: 3.2 | Uses: Yes  
+
+    // Data points for students who use social media while studying (Yes)
+    const scatterDataYes = [
+      {x: 2, y: 3.4},  // Record 1
+      {x: 8, y: 2.5},  // Record 2
+      {x: 2, y: 2.8},  // Record 4
+      {x: 7, y: 2.8},  // Record 5
+      {x: 6, y: 3.0},  // Record 6
+      {x: 5, y: 3.6},  // Record 7
+      {x: 5, y: 3.0},  // Record 9
+      {x: 3, y: 2.8},  // Record 10
+      {x: 4, y: 3.6},  // Record 11
+      {x: 6, y: 3.2},  // Record 12
+      {x: 5, y: 3.2},  // Record 14
+      {x: 7, y: 3.0},  // Record 15
+      {x: 6, y: 3.2},  // Record 17
+      {x: 2, y: 3.4},  // Record 18
+      {x: 4, y: 3.4},  // Record 20
+      {x: 6, y: 3.0},  // Record 21
+      {x: 7, y: 2.5},  // Record 22
+      {x: 5, y: 3.6},  // Record 23
+      {x: 3, y: 3.2},  // Record 24
+      {x: 6, y: 3.4},  // Record 25
+      {x: 4, y: 2.5},  // Record 26
+      {x: 7, y: 3.0},  // Record 28
+      {x: 3, y: 3.2},  // Record 29
+      {x: 6, y: 3.2}   // Record 30
+    ];
+    
+    // Data points for students who do NOT use social media while studying (No)
+    const scatterDataNo = [
+      {x: 4, y: 3.2},  // Record 3
+      {x: 4, y: 3.2},  // Record 8
+      {x: 1, y: 3.0},  // Record 13
+      {x: 3, y: 3.8},  // Record 16
+      {x: 1, y: 3.0},  // Record 19
+      {x: 5, y: 3.6}   // Record 27
+    ];
+    
+    // Create the scatter plot
+    const ctxScatter = document.getElementById('scatterChart').getContext('2d');
+    const scatterChart = new Chart(ctxScatter, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'Uses Social Media While Studying: Yes',
+            data: scatterDataYes,
+            backgroundColor: 'rgba(255, 99, 132, 0.6)'
+          },
+          {
+            label: 'Uses Social Media While Studying: No',
+            data: scatterDataNo,
+            backgroundColor: 'rgba(54, 162, 235, 0.6)'
+          }
+        ]
+      },
+      options: {
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Social Media Hours'
+            },
+            beginAtZero: true
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'GPA'
+            },
+            min: 0,
+            max: 4
+          }
+        }
+      }
+    });
+    
+    // Bar Chart Data: Average GPA for three groups based on social media usage hours.
+    // Groups are defined as:
+    //   - Low (1-3 hrs): Average GPA ≈ 3.18
+    //   - Medium (4-6 hrs): Average GPA ≈ 3.24
+    //   - High (7-8 hrs): Average GPA ≈ 2.76
+    const labels = ['Low (1-3 hrs)', 'Medium (4-6 hrs)', 'High (7-8 hrs)'];
+    const avgGPA = [3.18, 3.24, 2.76];
+    
+    const ctxBar = document.getElementById('barChart').getContext('2d');
+    const barChart = new Chart(ctxBar, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Average GPA',
+          data: avgGPA,
+          backgroundColor: [
+            'rgba(153, 102, 255, 0.6)',
+            'rgba(255, 159, 64, 0.6)',
+            'rgba(75, 192, 192, 0.6)'
+          ]
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 4,
+            title: {
+              display: true,
+              text: 'Average GPA'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Social Media Usage Group'
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
