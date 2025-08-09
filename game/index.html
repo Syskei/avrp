@@ -28,7 +28,7 @@
     // Pick backend based on where the page is running
     const API_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
       ? 'http://localhost:3000'
-      : 'https://api.avrp.me'; // switch to https://avrp.onrender.com if DNS not ready
+      : 'https://avrp.onrender.com'; // switch to https://avrp.onrender.com if DNS not ready
 
     // Load Socket.IO client from your backend so versions match
     const ioLoader = new Promise((resolve, reject) => {
@@ -163,3 +163,4 @@
   </script>
 </body>
 </html>
+
