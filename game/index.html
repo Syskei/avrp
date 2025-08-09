@@ -22,34 +22,38 @@
   <div id="crosshair"></div>
 
   <script type="module">
+    /* ---------- CDN module imports (no bundler needed) ---------- */
     import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
     import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
 
-    // Pick backend based on where the page is running
-    const API_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-      ? 'http://localhost:3000'
-      : 'https://avrp.onrender.com'; // switch to https://avrp.onrender.com if DNS not ready
+    /* ---------- Backend URL selection ---------- */
+    const API_URL =
+      (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+        ? 'http://localhost:3000'
+        : 'https://api.avrp.me'; // use https://avrp.onrender.com until DNS is green
 
-    // Load Socket.IO client from your backend so versions match
+    /* Load socket.io client served by your backend */
     const ioLoader = new Promise((resolve, reject) => {
       const s = document.createElement('script');
       s.src = API_URL + '/socket.io/socket.io.js';
       s.onload = () => resolve(window.io);
-      s.onerror = (e) => reject(e);
+      s.onerror = reject;
       document.body.appendChild(s);
     });
 
     const $ = id => document.getElementById(id);
     const log = msg => { const el = $('log'); el.textContent = String(msg) + '\n' + el.textContent; };
 
-    // THREE scene
+    /* ---------- THREE setup ---------- */
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b0f1a);
     const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 1000);
     camera.position.set(0, 1.6, 5);
+
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(innerWidth, innerHeight);
     document.body.appendChild(renderer.domElement);
+
     const controls = new PointerLockControls(camera, document.body);
 
     addEventListener('resize', () => {
@@ -74,6 +78,7 @@
     camera.add(hands);
     scene.add(camera);
 
+    /* ---------- Input & networking ---------- */
     const keys = new Set();
     let moveDir = new THREE.Vector3();
     let socket = null;
@@ -83,21 +88,22 @@
     const fwd = new THREE.Vector3();
 
     $('btnStart').addEventListener('click', () => controls.lock());
+
     controls.addEventListener('lock', async () => {
       $('btnStart').style.display = 'none';
       try {
         const io = await ioLoader;
         socket = io(API_URL, { transports: ['websocket', 'polling'] });
         wireSocket();
-      } catch (e) {
-        log('Failed to load socket.io client from ' + API_URL);
-        console.error(e);
+      } catch (err) {
+        log('Failed to load socket.io client. Check API_URL: ' + API_URL);
+        console.error(err);
       }
     });
 
     function wireSocket(){
       socket.on('connect', () => { myId = socket.id; log('Connected: ' + myId); });
-      socket.on('connect_error', (err) => log('Connection error: ' + err.message));
+
       socket.on('world', (snapshot) => {
         const seen = new Set();
         snapshot.players.forEach(p => {
@@ -116,24 +122,24 @@
           o.group.position.set(p.pos[0], p.pos[1], p.pos[2]);
           o.group.rotation.y = p.rot;
         });
-        // remove players that disappeared from snapshot
+
+        // prune players that disappeared
         for (const [id, obj] of [...others.entries()]) {
-          if (!seen.has(id)) {
-            scene.remove(obj.group);
-            others.delete(id);
-          }
+          if (!seen.has(id)) { scene.remove(obj.group); others.delete(id); }
         }
       });
 
-      socket.on('hit', (info) => {
-        log(`Hit: ${info.type} by ${info.from}`);
-      });
+      socket.on('hit', (info) => log(`Hit: ${info.type} by ${info.from}`));
     }
 
     addEventListener('keydown', e => keys.add(e.code));
     addEventListener('keyup', e => keys.delete(e.code));
-    addEventListener('mousedown', e => { if(e.button===0 && socket) socket.emit('attack'); if(e.button===2 && socket) socket.emit('block', {holding:true}); });
-    addEventListener('mouseup', e => { if(e.button===2 && socket) socket.emit('block', {holding:false}); });
+    addEventListener('mousedown', e => {
+      if (!socket) return;
+      if (e.button===0) socket.emit('attack');
+      if (e.button===2) socket.emit('block', {holding:true});
+    });
+    addEventListener('mouseup', e => { if (socket && e.button===2) socket.emit('block', {holding:false}); });
     addEventListener('contextmenu', e => e.preventDefault());
 
     let last = performance.now();
@@ -141,20 +147,21 @@
       const now = performance.now();
       const dt = (now - last)/1000; last = now;
 
-      moveDir.set(0,0,0);
-      const forward = keys.has('KeyW') - (keys.has('KeyS')?1:0);
-      const strafe = (keys.has('KeyD')?1:0) - (keys.has('KeyA')?1:0);
+      // movement
+      const forward = (keys.has('KeyW')?1:0) - (keys.has('KeyS')?1:0);
+      const strafe  = (keys.has('KeyD')?1:0) - (keys.has('KeyA')?1:0);
       const speed = (keys.has('ShiftLeft')||keys.has('ShiftRight')) ? SPRINT : SPEED;
 
       camera.getWorldDirection(fwd);
       const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0,1,0)).normalize();
       const flatFwd = new THREE.Vector3(fwd.x,0,fwd.z).normalize();
+      moveDir.set(0,0,0);
       moveDir.addScaledVector(flatFwd, forward);
       moveDir.addScaledVector(right, strafe);
       if(moveDir.lengthSq()>0) moveDir.normalize().multiplyScalar(speed*dt);
       camera.position.add(moveDir);
 
-      if(socket) socket.emit('state', {pos:[camera.position.x,camera.position.y,camera.position.z], rot:camera.rotation.y});
+      if (socket) socket.emit('state', {pos:[camera.position.x,camera.position.y,camera.position.z], rot:camera.rotation.y});
 
       renderer.render(scene, camera);
       requestAnimationFrame(tick);
@@ -163,4 +170,3 @@
   </script>
 </body>
 </html>
-
