@@ -7,7 +7,7 @@
   <style>
     html, body { margin:0; height:100%; overflow:hidden; background:#0b0f1a; color:#e6e8ef; font-family:sans-serif; }
     #ui { position:fixed; top:12px; left:12px; background:rgba(14,18,33,.6); padding:10px 12px; border-radius:12px; backdrop-filter: blur(6px); border:1px solid rgba(255,255,255,.06); z-index:10; }
-    #log { font-size:12px; opacity:.85; max-width:360px; }
+    #log { font-size:12px; opacity:.85; max-width:360px; white-space:pre-wrap; }
     #crosshair { position:fixed; inset:0; margin:auto; width:6px; height:6px; border:2px solid #e6e8ef; border-radius:50%; opacity:.6; pointer-events:none; }
     #hud { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); background:rgba(14,18,33,.6); border:1px solid rgba(255,255,255,.06); border-radius:12px; padding:8px 12px; font-size:14px; }
     #btnStart { cursor:pointer; padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,.12); background:#121a2b; color:#e6e8ef; }
@@ -20,21 +20,29 @@
   </div>
   <div id="hud">WASD move • Shift sprint • LMB swing • RMB block/parry</div>
   <div id="crosshair"></div>
+
   <script type="module">
     import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
     import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
 
-    const SERVER_URL = 'https://api.avrp.me';
-    const ioLoader = new Promise((resolve) => {
+    // Pick backend based on where the page is running
+    const API_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+      ? 'http://localhost:3000'
+      : 'https://api.avrp.me'; // switch to https://avrp.onrender.com if DNS not ready
+
+    // Load Socket.IO client from your backend so versions match
+    const ioLoader = new Promise((resolve, reject) => {
       const s = document.createElement('script');
-      s.src = SERVER_URL + '/socket.io/socket.io.js';
+      s.src = API_URL + '/socket.io/socket.io.js';
       s.onload = () => resolve(window.io);
+      s.onerror = (e) => reject(e);
       document.body.appendChild(s);
     });
 
     const $ = id => document.getElementById(id);
-    const log = msg => { const el = $('log'); el.textContent = msg + '\n' + el.textContent; };
+    const log = msg => { const el = $('log'); el.textContent = String(msg) + '\n' + el.textContent; };
 
+    // THREE scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b0f1a);
     const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 1000);
@@ -44,15 +52,17 @@
     document.body.appendChild(renderer.domElement);
     const controls = new PointerLockControls(camera, document.body);
 
-    const hemi = new THREE.HemisphereLight(0xffffff, 0x223355, 0.8);
-    scene.add(hemi);
-    const dir = new THREE.DirectionalLight(0xffffff, 0.6);
-    dir.position.set(3, 6, 2);
-    scene.add(dir);
+    addEventListener('resize', () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x223355, 0.8); scene.add(hemi);
+    const dir = new THREE.DirectionalLight(0xffffff, 0.6); dir.position.set(3, 6, 2); scene.add(dir);
 
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: 0x1b2337 }));
-    ground.rotation.x = -Math.PI/2;
-    scene.add(ground);
+    ground.rotation.x = -Math.PI/2; scene.add(ground);
 
     const hands = new THREE.Group();
     const localSword = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.6, 0.03), new THREE.MeshStandardMaterial({ color:0xffffff }));
@@ -75,19 +85,30 @@
     $('btnStart').addEventListener('click', () => controls.lock());
     controls.addEventListener('lock', async () => {
       $('btnStart').style.display = 'none';
-      const io = await ioLoader;
-      socket = io(SERVER_URL);
-      wireSocket();
+      try {
+        const io = await ioLoader;
+        socket = io(API_URL, { transports: ['websocket', 'polling'] });
+        wireSocket();
+      } catch (e) {
+        log('Failed to load socket.io client from ' + API_URL);
+        console.error(e);
+      }
     });
 
     function wireSocket(){
       socket.on('connect', () => { myId = socket.id; log('Connected: ' + myId); });
+      socket.on('connect_error', (err) => log('Connection error: ' + err.message));
       socket.on('world', (snapshot) => {
+        const seen = new Set();
         snapshot.players.forEach(p => {
           if (p.id === myId) return;
+          seen.add(p.id);
           let o = others.get(p.id);
           if (!o){
-            const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, 0.9, 8, 16), new THREE.MeshStandardMaterial({ color:0x80d8ff }));
+            const body = new THREE.Mesh(
+              new THREE.CapsuleGeometry(0.3, 0.9, 8, 16),
+              new THREE.MeshStandardMaterial({ color:0x80d8ff })
+            );
             const g = new THREE.Group();
             body.position.y = 1.1; g.add(body); scene.add(g);
             others.set(p.id, { group:g }); o = others.get(p.id);
@@ -95,23 +116,36 @@
           o.group.position.set(p.pos[0], p.pos[1], p.pos[2]);
           o.group.rotation.y = p.rot;
         });
+        // remove players that disappeared from snapshot
+        for (const [id, obj] of [...others.entries()]) {
+          if (!seen.has(id)) {
+            scene.remove(obj.group);
+            others.delete(id);
+          }
+        }
+      });
+
+      socket.on('hit', (info) => {
+        log(`Hit: ${info.type} by ${info.from}`);
       });
     }
 
     addEventListener('keydown', e => keys.add(e.code));
     addEventListener('keyup', e => keys.delete(e.code));
-    addEventListener('mousedown', e => { if(e.button===0) socket.emit('attack'); if(e.button===2) socket.emit('block', {holding:true}); });
-    addEventListener('mouseup', e => { if(e.button===2) socket.emit('block', {holding:false}); });
+    addEventListener('mousedown', e => { if(e.button===0 && socket) socket.emit('attack'); if(e.button===2 && socket) socket.emit('block', {holding:true}); });
+    addEventListener('mouseup', e => { if(e.button===2 && socket) socket.emit('block', {holding:false}); });
     addEventListener('contextmenu', e => e.preventDefault());
 
     let last = performance.now();
     function tick(){
       const now = performance.now();
       const dt = (now - last)/1000; last = now;
+
       moveDir.set(0,0,0);
       const forward = keys.has('KeyW') - (keys.has('KeyS')?1:0);
       const strafe = (keys.has('KeyD')?1:0) - (keys.has('KeyA')?1:0);
       const speed = (keys.has('ShiftLeft')||keys.has('ShiftRight')) ? SPRINT : SPEED;
+
       camera.getWorldDirection(fwd);
       const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0,1,0)).normalize();
       const flatFwd = new THREE.Vector3(fwd.x,0,fwd.z).normalize();
@@ -119,7 +153,9 @@
       moveDir.addScaledVector(right, strafe);
       if(moveDir.lengthSq()>0) moveDir.normalize().multiplyScalar(speed*dt);
       camera.position.add(moveDir);
+
       if(socket) socket.emit('state', {pos:[camera.position.x,camera.position.y,camera.position.z], rot:camera.rotation.y});
+
       renderer.render(scene, camera);
       requestAnimationFrame(tick);
     }
