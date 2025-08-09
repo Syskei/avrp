@@ -5,7 +5,6 @@ import { Server } from 'socket.io';
 const app = express();
 const server = http.createServer(app);
 
-// Allow your site, subdomain, Render URL, and local dev
 const allowedOrigins = [
   'https://avrp.me',
   'https://www.avrp.me',
@@ -16,10 +15,7 @@ const allowedOrigins = [
 ];
 
 const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ['GET', 'POST']
-  }
+  cors: { origin: allowedOrigins, methods: ['GET','POST'] }
 });
 
 const TICK = 30;
@@ -87,9 +83,7 @@ io.on('connection', socket => {
     }
   });
 
-  socket.on('disconnect', () => {
-    players.delete(id);
-  });
+  socket.on('disconnect', () => { players.delete(id); });
 });
 
 setInterval(() => io.emit('world', snapshot()), 1000 / TICK);
